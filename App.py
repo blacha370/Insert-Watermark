@@ -67,8 +67,6 @@ class App:
         elif self.logo_size is None:
             self.get_logo_size()
         images = self.images.copy()
-        import time
-        start = time.time()
         for image in images:
             self.draw_image(image)
             self.images.remove(image)
@@ -77,7 +75,6 @@ class App:
         self.gui.remove_images()
         self.change_images(self.errors)
         self.gui.toggle_buttons(disable=False)
-        print(time.time() - start)
 
     def change_logo(self, logo):
         self.logo = logo
