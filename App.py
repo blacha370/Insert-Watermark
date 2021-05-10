@@ -25,62 +25,18 @@ class App:
             self.logo_size = logo.size
             return self.logo_size
 
-    def find_position(self, image_path):
-        try:
-            image = cv2.imdecode(np.fromfile(image_path, dtype=np.uint8), 1)
-            cv2.rectangle(image, (0, 0), (image.shape[1], image.shape[0]), (255, 255, 255), 10)
-            logo_area = (self.logo_size[0] + 10) * (self.logo_size[1] + 10)
-            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            _, gray = cv2.threshold(gray, 200, 255, 0)
-            gray = cv2.bitwise_not(gray)
-            contours, _ = cv2.findContours(gray, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-            for cnt in contours:
-                if cv2.contourArea(cnt) > logo_area:
-                    step = 10
-                    rect = cv2.minAreaRect(cnt)
-                    box = cv2.boxPoints(rect)
-                    box = np.int0(box)
-                    max_points = np.amax(box, axis=0)
-                    min_points = np.min(box, axis=0)
-                    center = np.int0((max_points + min_points) / 2)
-                    update = {'left': True, 'right': True, 'top': True, 'bottom': True}
-                    left = self.check_value(center[0] - 1, image.shape[1])
-                    right = self.check_value(center[0] + 1, image.shape[1])
-                    top = self.check_value(center[1] - 1, image.shape[0])
-                    bottom = self.check_value(center[1] + 1, image.shape[0])
-                    while update['left'] or update['right'] or update['top'] or update['bottom']:
-                        if update['left']:
-                            left = self.check_value(left - step, image.shape[1])
-                            if np.where(gray[top:bottom, left:left + step] == 0
-                                        )[0].size / gray[top:bottom, left:left + 10].size > 0.01 or left == step:
-                                left = self.check_value(left + 10, image.shape[1])
-                                update['left'] = False
-                        if update['right']:
-                            right = self.check_value(right + step, image.shape[1])
-                            if np.where(gray[top:bottom, right - step:right] == 0
-                                        )[0].size / gray[top:bottom, right - step:right].size > 0.01 or \
-                                    right == image.shape[1]:
-                                right = self.check_value(right - 10, image.shape[1])
-                                update['right'] = False
-                        if update['top']:
-                            top = self.check_value(top - step, image.shape[0])
-                            if np.where(gray[top:top + step, left:right] == 0
-                                        )[0].size / gray[top:top + step, left:right].size > 0.01 or top == step:
-                                top = self.check_value(top + 10, image.shape[0])
-                                update['top'] = False
-                        if update['bottom']:
-                            bottom = self.check_value(bottom + step, image.shape[0])
-                            if np.where(gray[bottom - step:bottom, left:right] == 0
-                                        )[0].size / gray[bottom - step:bottom, left:right].size > 0.01 or bottom == image.shape[0]:
-                                bottom = self.check_value(bottom - 10, image.shape[0])
-                                update['bottom'] = False
-                    square = gray[top:bottom, left:right]
-                    if square.shape[0] >= self.logo_size[0] + 10 and square.shape[1] >= self.logo_size[1] + 10:
-                        return left + 5, bottom - 5 - self.logo_size[0]
-        except ValueError:
-            return None
-        except ZeroDivisionError:
-            return None
+    def find_position(self, image_path, step=20, margin=10):
+        image = cv2.imdecode(np.fromfile(image_path, dtype=np.uint8), 1)
+        row = np.full(self.logo_size[1] + margin, 255)
+        matrix = np.full((self.logo_size[0] + margin, self.logo_size[1] + margin), 255)
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        _, gray = cv2.threshold(gray, 200, 255, 0)
+        gray = cv2.bitwise_not(gray)
+        for x in range(0, gray.shape[1] - self.logo_size[1] + 1, step):
+            for y in range(0, gray.shape[0] - self.logo_size[0] + 1, step):
+                if np.array_equal(row, gray[y, x:self.logo_size[1] + x + margin]):
+                    if np.array_equal(matrix, gray[y:self.logo_size[0] + y + margin, x:self.logo_size[1] + x + margin]):
+                        return int(x + margin/2), int(y + margin/2)
 
     def draw(self):
         self.gui.toggle_buttons(disable=True)
