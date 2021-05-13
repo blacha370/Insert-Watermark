@@ -10,7 +10,6 @@ class App:
         self.images = []
         self.logo = None
         self.directory = None
-        self.logo_size = None
         self.errors = []
         self.observer = Observer(self)
         self.gui = Gui(self.observer)
@@ -27,7 +26,7 @@ class App:
         logo = Image.open(self.logo)
         images_copy = self.images.copy()
         for image in images_copy:
-            result = draw_image(image, logo, 'A', 10, 20)
+            result = draw_image(image, logo, 'A', 10, 20, auto=True)
             if result:
                 name = '{}/{}'.format(self.directory, image.split('/')[-1])
                 if name == image:
@@ -45,7 +44,6 @@ class App:
         self.gui.toggle_buttons(disable=False)
 
     def change_logo(self, logo):
-        print(logo)
         self.logo = logo
         self.gui.change_logo_text(logo)
 
@@ -54,7 +52,6 @@ class App:
         self.gui.change_dir_text(directory)
 
     def change_images(self, images):
-        print(images)
         self.images = list(images)
         for image in self.images:
             self.gui.create_image(image)

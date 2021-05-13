@@ -52,7 +52,6 @@ def draw_image(image_path, logo, placement, margin, step, auto=False):
     image = Image.open(image_path)
     image_copy = image.copy()
     image_copy.paste(logo, position, logo)
-    image_copy.show()
     return image_copy
 
 

@@ -114,6 +114,3 @@ class Gui:
 
     def create_gui(self):
         self.root.mainloop()
-
-    def destroy_gui(self):
-        self.root.destroy()
