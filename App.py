@@ -45,6 +45,7 @@ class App:
         self.gui.toggle_buttons(disable=False)
 
     def change_logo(self, logo):
+        print(logo)
         self.logo = logo
         self.gui.change_logo_text(logo)
 
@@ -53,6 +54,7 @@ class App:
         self.gui.change_dir_text(directory)
 
     def change_images(self, images):
+        print(images)
         self.images = list(images)
         for image in self.images:
             self.gui.create_image(image)
